@@ -133,3 +133,32 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+/**
+ * Admin procedure
+ * 
+ * Ensures the user is authenticated and has admin role
+ */
+export const adminProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(async ({ ctx, next }) => {
+    if (!ctx.session?.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    
+    // Check if user has admin role
+    const user = await ctx.db.user.findUnique({
+      where: { id: ctx.session.user.id },
+      select: { role: true },
+    });
+    
+    if (!user || user.role !== "ADMIN") {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
+    }
+    
+    return next({
+      ctx: {
+        session: { ...ctx.session, user: ctx.session.user },
+      },
+    });
+  });

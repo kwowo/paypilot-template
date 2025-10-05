@@ -1,75 +1,137 @@
 import Link from "next/link";
+import Image from "next/image";
 
-import { LatestPost } from "@/app/_components/post";
 import { auth } from "@/lib/auth";
 import { api, HydrateClient } from "@/trpc/server";
-import { SignOutButton } from "@/app/_components/sign-out-button";
 
 export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
   const session = await auth.api.getSession({
     headers: await import("next/headers").then((mod) => mod.headers()),
   });
 
-  if (session?.user) {
-    void api.post.getLatest.prefetch();
-  }
+  const [featuredProducts, categories] = await Promise.all([
+    api.product.getFeatured(),
+    api.category.getAll(),
+  ]);
 
   return (
     <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-          </h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/usage/first-steps"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">First Steps →</h3>
-              <div className="text-lg">
-                Just the basics - Everything you need to know to set up your
-                database and authentication.
-              </div>
-            </Link>
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/introduction"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">Documentation →</h3>
-              <div className="text-lg">
-                Learn more about Create T3 App, the libraries it uses, and how
-                to deploy it.
-              </div>
-            </Link>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello ? hello.greeting : "Loading tRPC query..."}
+      <main className="min-h-screen bg-white">
+        {/* Hero Section */}
+        <section className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-20">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="text-5xl font-bold mb-6">
+              Premium T-Shirts for Everyone
+            </h1>
+            <p className="text-xl mb-8 max-w-2xl mx-auto">
+              Discover our collection of high-quality, comfortable t-shirts in a variety of styles and colors.
+              Perfect for every occasion.
             </p>
-
-            <div className="flex flex-col items-center justify-center gap-4">
-              <p className="text-center text-2xl text-white">
-                {session && <span>Logged in as {session.user?.name}</span>}
-              </p>
-              {session ? (
-                <SignOutButton />
-              ) : (
+            <div className="flex gap-4 justify-center">
+              <Link
+                href="/shop"
+                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+              >
+                Shop Now
+              </Link>
+              {!session && (
                 <Link
                   href="/sign-in"
-                  className="rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20"
+                  className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors"
                 >
-                  Sign in
+                  Sign In
                 </Link>
               )}
             </div>
           </div>
+        </section>
 
-          {session?.user && <LatestPost />}
-        </div>
+        {/* Categories Section */}
+        <section className="py-16 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">
+              Shop by Category
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {categories.map((category: any) => (
+                <Link
+                  key={category.id}
+                  href={`/category/${category.slug}`}
+                  className="group relative overflow-hidden rounded-lg bg-white shadow-lg hover:shadow-xl transition-shadow"
+                >
+                  <div className="aspect-square bg-gray-200 flex items-center justify-center">
+                    <span className="text-6xl">👕</span>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                      {category.name}
+                    </h3>
+                    <p className="text-gray-600 mt-2">{category.description}</p>
+                    <div className="mt-4 text-sm text-gray-500">
+                      {category._count?.products || 0} products
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Featured Products Section */}
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">
+              Featured Products
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts.map((product: any) => (
+                <Link
+                  key={product.id}
+                  href={`/product/${product.slug}`}
+                  className="group bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden"
+                >
+                  <div className="aspect-square bg-gray-200 flex items-center justify-center">
+                    <span className="text-4xl">👕</span>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                      {product.name}
+                    </h3>
+                    <p className="text-gray-600 text-sm mt-1 line-clamp-2">
+                      {product.description}
+                    </p>
+                    <div className="flex justify-between items-center mt-3">
+                      <span className="text-xl font-bold text-gray-900">
+                        ${product.price}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {product.category.name}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Call to Action */}
+        <section className="bg-gray-900 text-white py-16">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl font-bold mb-4">
+              Ready to Find Your Perfect T-Shirt?
+            </h2>
+            <p className="text-xl mb-8 text-gray-300">
+              Browse our full collection and discover your new favorite.
+            </p>
+            <Link
+              href="/shop"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+            >
+              View All Products
+            </Link>
+          </div>
+        </section>
       </main>
     </HydrateClient>
   );

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { api, HydrateClient } from "@/trpc/server";
 
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{ category: string }>;
 }

@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { api, HydrateClient } from "@/trpc/server";
 import { AddToCartForm } from "./AddToCartForm";
 
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

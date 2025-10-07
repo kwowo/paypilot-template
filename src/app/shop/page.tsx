@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { api, HydrateClient } from "@/trpc/server";
 
+export const dynamic = 'force-dynamic';
+
 export default async function ShopPage() {
   void api.product.getAll.prefetch({});
 

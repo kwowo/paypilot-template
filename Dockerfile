@@ -33,6 +33,9 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 # Copy the entire node_modules to ensure all Prisma dependencies are available
 COPY --from=builder /app/node_modules ./node_modules
+# Copy startup script
+COPY docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
 EXPOSE 3000
-# Run migrations and start the app with explicit schema path
-CMD ["sh", "-c", "npx prisma migrate deploy --schema=./prisma/schema.prisma && node server.js"]
+# Use the startup script
+CMD ["./docker-entrypoint.sh"]

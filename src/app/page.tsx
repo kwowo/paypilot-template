@@ -5,6 +5,8 @@ import { auth } from "@/lib/auth";
 import { api, HydrateClient } from "@/trpc/server";
 import { SignOutButton } from "@/app/_components/sign-out-button";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const hello = await api.post.hello({ text: "from tRPC" });
   const session = await auth.api.getSession({

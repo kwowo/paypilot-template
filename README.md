@@ -1,6 +1,64 @@
-# Create T3 App
+# TeeShop - T-Shirt E-commerce Store
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app` and customized with Better Auth for authentication.
+A modern, full-stack t-shirt e-commerce website built with the T3 stack (Next.js, TypeScript, tRPC, Prisma, Tailwind CSS).
+
+## 🚀 Features
+
+### ✅ Completed Features
+- **Homepage** with hero section, featured products, and category navigation
+- **Product Catalog** with category filtering (Men, Women, Kids)
+- **Product Detail Pages** with size/color selection and add to cart functionality
+- **Shopping Cart** with quantity management
+- **User Authentication** (Sign in/Sign up) with Better Auth
+- **Order History** for authenticated users
+- **Responsive Design** that works on all devices
+- **About Page** with store information
+
+### 🔧 Technical Features
+- **T3 Stack Architecture** with modern best practices
+- **Type-safe APIs** with tRPC
+- **Database Schema** designed for e-commerce
+- **Authentication System** with Better Auth
+- **Responsive UI** with Tailwind CSS
+- **Mock Data** for development (ready for database integration)
+
+## 🛣️ Route Structure
+
+### Static Routes
+- `/` - Homepage with featured products
+- `/shop` - All products catalog
+- `/cart` - Shopping cart (auth required)
+- `/orders` - Order history (auth required)
+- `/about` - Store information
+- `/sign-in` - User login
+- `/sign-up` - User registration
+
+### Dynamic Routes
+- `/shop/[category]` - Category pages (men, women, kids)
+- `/product/[slug]` - Individual product pages
+
+## 📁 Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── cart/              # Shopping cart
+│   ├── orders/            # Order history
+│   ├── product/[slug]/    # Product detail pages
+│   ├── shop/              # Product catalog
+│   │   └── [category]/    # Category pages
+│   ├── about/             # About page
+│   └── layout.tsx         # Root layout with navigation
+├── components/
+│   └── layout/
+│       └── Navbar.tsx     # Main navigation component
+├── server/api/            # tRPC API routes
+│   └── routers/
+│       ├── product.ts     # Product operations
+│       ├── category.ts    # Category operations
+│       └── cart.ts        # Cart operations
+└── lib/                   # Utilities and configurations
+```
 
 ## Tech Stack
 

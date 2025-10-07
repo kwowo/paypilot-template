@@ -1,76 +1,149 @@
 import Link from "next/link";
-
-import { LatestPost } from "@/app/_components/post";
-import { auth } from "@/lib/auth";
 import { api, HydrateClient } from "@/trpc/server";
-import { SignOutButton } from "@/app/_components/sign-out-button";
 
 export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
-  const session = await auth.api.getSession({
-    headers: await import("next/headers").then((mod) => mod.headers()),
-  });
-
-  if (session?.user) {
-    void api.post.getLatest.prefetch();
-  }
+  void api.product.getFeatured.prefetch({});
 
   return (
     <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-          </h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/usage/first-steps"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">First Steps →</h3>
-              <div className="text-lg">
-                Just the basics - Everything you need to know to set up your
-                database and authentication.
-              </div>
-            </Link>
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/introduction"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">Documentation →</h3>
-              <div className="text-lg">
-                Learn more about Create T3 App, the libraries it uses, and how
-                to deploy it.
-              </div>
-            </Link>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello ? hello.greeting : "Loading tRPC query..."}
-            </p>
-
-            <div className="flex flex-col items-center justify-center gap-4">
-              <p className="text-center text-2xl text-white">
-                {session && <span>Logged in as {session.user?.name}</span>}
+      <div className="min-h-screen bg-white">
+        {/* Hero Section */}
+        <section className="relative bg-gray-900 text-white">
+          <div className="absolute inset-0 bg-black opacity-50"></div>
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+            <div className="text-center">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+                Premium T-Shirts for Everyone
+              </h1>
+              <p className="text-xl md:text-2xl mb-8 text-gray-300">
+                Discover our collection of high-quality, comfortable t-shirts
               </p>
-              {session ? (
-                <SignOutButton />
-              ) : (
-                <Link
-                  href="/sign-in"
-                  className="rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20"
-                >
-                  Sign in
-                </Link>
-              )}
+              <Link 
+                href="/shop" 
+                className="bg-white text-gray-900 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors"
+              >
+                Shop Now
+              </Link>
             </div>
           </div>
+        </section>
 
-          {session?.user && <LatestPost />}
-        </div>
-      </main>
+        {/* Featured Products */}
+        <section className="py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">
+              Featured Products
+            </h2>
+            <FeaturedProducts />
+          </div>
+        </section>
+
+        {/* Categories */}
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">
+              Shop by Category
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <Link 
+                href="/shop/men" 
+                className="group relative overflow-hidden rounded-lg"
+              >
+                <div className="aspect-square bg-gray-200 flex items-center justify-center">
+                  <span className="text-2xl font-bold text-gray-600">Men</span>
+                </div>
+                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-white text-xl font-semibold">Shop Men&apos;s</span>
+                </div>
+              </Link>
+              
+              <Link 
+                href="/shop/women" 
+                className="group relative overflow-hidden rounded-lg"
+              >
+                <div className="aspect-square bg-gray-200 flex items-center justify-center">
+                  <span className="text-2xl font-bold text-gray-600">Women</span>
+                </div>
+                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-white text-xl font-semibold">Shop Women&apos;s</span>
+                </div>
+              </Link>
+              
+              <Link 
+                href="/shop/kids" 
+                className="group relative overflow-hidden rounded-lg"
+              >
+                <div className="aspect-square bg-gray-200 flex items-center justify-center">
+                  <span className="text-2xl font-bold text-gray-600">Kids</span>
+                </div>
+                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-white text-xl font-semibold">Shop Kids&apos;</span>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </section>
+      </div>
     </HydrateClient>
+  );
+}
+
+function FeaturedProducts() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Mock featured products - will be replaced with real data */}
+      <ProductCard 
+        id="1"
+        name="Classic Black T-Shirt"
+        price={29.99}
+        image="/products/black-tshirt-1.jpg"
+        slug="classic-black-tshirt"
+      />
+      <ProductCard 
+        id="2"
+        name="White Cotton Tee"
+        price={24.99}
+        image="/products/white-tshirt-1.jpg"
+        slug="white-cotton-tee"
+      />
+      <ProductCard 
+        id="4"
+        name="Kids Rainbow Tee"
+        price={19.99}
+        image="/products/kids-rainbow-1.jpg"
+        slug="kids-rainbow-tee"
+      />
+      <ProductCard 
+        id="1"
+        name="Classic Black T-Shirt"
+        price={29.99}
+        image="/products/black-tshirt-1.jpg"
+        slug="classic-black-tshirt"
+      />
+    </div>
+  );
+}
+
+interface ProductCardProps {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  slug: string;
+}
+
+function ProductCard({ name, price, slug }: ProductCardProps) {
+  return (
+    <Link href={`/product/${slug}`} className="group">
+      <div className="bg-white rounded-lg shadow-md overflow-hidden group-hover:shadow-lg transition-shadow">
+        <div className="aspect-square bg-gray-200 flex items-center justify-center">
+          <span className="text-gray-500">Product Image</span>
+        </div>
+        <div className="p-4">
+          <h3 className="font-semibold text-gray-900 mb-2">{name}</h3>
+          <p className="text-gray-700 font-bold">${price.toFixed(2)}</p>
+        </div>
+      </div>
+    </Link>
   );
 }

@@ -6,7 +6,7 @@ import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
 const config = {
-  output: "standalone",
+  // Removed output: "standalone" to fix build issues
 };
 
 export default config;

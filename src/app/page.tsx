@@ -3,6 +3,9 @@ import Image from "next/image";
 
 import { api, HydrateClient } from "@/trpc/server";
 
+// Force dynamic rendering to avoid build-time database issues
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   // Prefetch featured products
   void api.product.getAll.prefetch({ featured: true, limit: 8 });

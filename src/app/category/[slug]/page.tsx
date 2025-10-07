@@ -4,6 +4,9 @@ import Image from "next/image";
 
 import { api, HydrateClient } from "@/trpc/server";
 
+// Dynamic pages that depend on database data
+export const dynamic = 'force-dynamic';
+
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
 }

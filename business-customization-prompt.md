@@ -151,6 +151,44 @@ find src/app -type d -name "\[*\]" -exec test -f {}/page.tsx \; -print
 7. **Integration:** End-to-end code review → verify no missing files
 8. **Database Setup:** The PostgreSQL database is already running via Docker. Simply execute the appropriate setup script (`setup-database.bat` on Windows or `start-database.sh` on Unix/Linux/MacOS) to initialize schemas and seed data whenever necessary.
 
+**CRITICAL: Build-Time Database Connection Prevention**
+```typescript
+// ❌ NEVER: Server-side data fetching during static generation (causes build failures)
+export default async function HomePage() {
+  void api.product.getAll.prefetch(); // Fails during build - no DB connection
+  const products = await api.product.getAll(); // Fails during build
+}
+
+// ✅ ALWAYS: Use force-dynamic for database-dependent pages
+export const dynamic = 'force-dynamic'; // Add this to ALL pages that fetch data
+
+export default async function HomePage() {
+  // Now safe to use server-side data fetching
+  void api.product.getAll.prefetch({ featured: true, limit: 8 });
+  void api.category.getAll.prefetch();
+  
+  return <YourContent />;
+}
+
+// ✅ Alternative: Client-side data fetching (no force-dynamic needed)
+export default function HomePage() {
+  // No server-side data calls - let client components handle data
+  return (
+    <HydrateClient>
+      <ClientProductList /> {/* Client component fetches data */}
+    </HydrateClient>
+  );
+}
+```
+
+**Pages Requiring `force-dynamic` (MANDATORY):**
+- Home page with product/category prefetching
+- Product listing pages (`/products`)
+- Category pages (`/category/[slug]`)
+- Product detail pages (`/products/[slug]`)
+- Any page using `await api.*` calls
+- Any page using `api.*.prefetch()`
+
 ### Phase 4: Validation Testing
 
 **Route Completeness Checks (FIRST PRIORITY):**
@@ -165,6 +203,11 @@ find src/app -type d -name "\[*\]" -exec test -f {}/page.tsx \; -print
 **Critical Checks (Must Pass):**
 ```bash
 pnpm build && pnpm lint && pnpm typecheck  # Zero errors required - MUST pass in production build
+
+# Build-time database connection prevention checks:
+grep -r "await api\." src/app/ | grep -v "force-dynamic" # Should be empty or have force-dynamic
+grep -r "\.prefetch(" src/app/ | grep -v "force-dynamic" # Should be empty or have force-dynamic
+
 grep -r "\[\.\.\.Array(" src/  # Should be empty (use Array.from)
 grep -r "<img " src/           # Should be empty (use Next.js Image)
 grep -r "toNumber()" src/server/api/routers/  # Verify Decimal conversion
@@ -517,6 +560,7 @@ updateQuantity.mutate();    // Handle promise properly
 
 **Build Requirements:**
 - ✅ `pnpm build` passes (zero TypeScript/ESLint errors) **← PRODUCTION BUILD MUST PASS**
+- ✅ **Database-dependent pages use `force-dynamic`:** All pages with `await api.*` or `api.*.prefetch()` must export `const dynamic = 'force-dynamic'`
 - ✅ All Decimal types converted to numbers in tRPC routers  
 - ✅ No `<img>` tags (use Next.js Image)
 - ✅ No unsafe Array patterns (`[...Array(n)]`)
@@ -747,6 +791,9 @@ ls public/products/
 **Pre-Completion Review:**
 - [ ] **Route Structure Complete:** No empty dynamic route folders (`find src/app -type d -name "\[*\]" -empty`)
 - [ ] **All page.tsx Files Present:** Every route folder contains `page.tsx`
+- [ ] **Database Pages Use force-dynamic:** All pages with `await api.*` or `api.*.prefetch()` export `const dynamic = 'force-dynamic'`
+- [ ] **Build Prevention Checks:** `grep -r "await api\." src/app/ | grep -v "force-dynamic"` returns empty
+- [ ] **Prefetch Prevention Checks:** `grep -r "\.prefetch(" src/app/ | grep -v "force-dynamic"` returns empty
 - [ ] **Functional Interactions:** No empty click handlers (`grep -r "onClick={() => {}}" src/`)
 - [ ] **Layout Consistency:** Single Navbar component in layout.tsx, no navigation in individual pages
 - [ ] **Authentication UI:** Sign-out option visible on all pages when user is logged in

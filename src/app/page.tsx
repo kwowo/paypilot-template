@@ -1,76 +1,174 @@
 import Link from "next/link";
+import Image from "next/image";
 
-import { LatestPost } from "@/app/_components/post";
-import { auth } from "@/lib/auth";
 import { api, HydrateClient } from "@/trpc/server";
-import { SignOutButton } from "@/app/_components/sign-out-button";
 
 export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
-  const session = await auth.api.getSession({
-    headers: await import("next/headers").then((mod) => mod.headers()),
-  });
-
-  if (session?.user) {
-    void api.post.getLatest.prefetch();
-  }
+  // Prefetch featured products
+  void api.product.getAll.prefetch({ featured: true, limit: 8 });
+  void api.category.getAll.prefetch();
 
   return (
     <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-          </h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/usage/first-steps"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">First Steps →</h3>
-              <div className="text-lg">
-                Just the basics - Everything you need to know to set up your
-                database and authentication.
-              </div>
-            </Link>
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/introduction"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">Documentation →</h3>
-              <div className="text-lg">
-                Learn more about Create T3 App, the libraries it uses, and how
-                to deploy it.
-              </div>
-            </Link>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello ? hello.greeting : "Loading tRPC query..."}
-            </p>
-
-            <div className="flex flex-col items-center justify-center gap-4">
-              <p className="text-center text-2xl text-white">
-                {session && <span>Logged in as {session.user?.name}</span>}
+      <div className="min-h-screen">
+        {/* Hero Section */}
+        <section className="bg-gradient-to-r from-gray-900 to-black py-20 text-white">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
+                Premium Quality T-Shirts
+              </h1>
+              <p className="mt-6 text-lg leading-8 text-gray-300">
+                Discover our collection of comfortable, stylish, and sustainable t-shirts
+                for every occasion. Made with the finest materials for lasting comfort.
               </p>
-              {session ? (
-                <SignOutButton />
-              ) : (
+              <div className="mt-10 flex items-center justify-center gap-x-6">
                 <Link
-                  href="/sign-in"
-                  className="rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20"
+                  href="/products"
+                  className="rounded-md bg-white px-8 py-3 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100"
                 >
-                  Sign in
+                  Shop Now
                 </Link>
-              )}
+                <Link
+                  href="/about"
+                  className="text-sm font-semibold leading-6 text-white hover:text-gray-300"
+                >
+                  Learn more <span aria-hidden="true">→</span>
+                </Link>
+              </div>
             </div>
           </div>
+        </section>
 
-          {session?.user && <LatestPost />}
-        </div>
-      </main>
+        {/* Featured Categories */}
+        <section className="py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+                Shop by Category
+              </h2>
+              <p className="mt-4 text-lg text-gray-600">
+                Find the perfect t-shirt for your style
+              </p>
+            </div>
+            <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              <Link
+                href="/category/mens"
+                className="group relative overflow-hidden rounded-lg bg-gray-100 aspect-square hover:opacity-75"
+              >
+                <Image
+                  src="/products/placeholder.svg"
+                  alt="Men's T-Shirts"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                  <h3 className="text-2xl font-bold text-white">Men&apos;s</h3>
+                </div>
+              </Link>
+              <Link
+                href="/category/womens"
+                className="group relative overflow-hidden rounded-lg bg-gray-100 aspect-square hover:opacity-75"
+              >
+                <Image
+                  src="/products/placeholder.svg"
+                  alt="Women's T-Shirts"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                  <h3 className="text-2xl font-bold text-white">Women&apos;s</h3>
+                </div>
+              </Link>
+              <Link
+                href="/category/unisex"
+                className="group relative overflow-hidden rounded-lg bg-gray-100 aspect-square hover:opacity-75"
+              >
+                <Image
+                  src="/products/placeholder.svg"
+                  alt="Unisex T-Shirts"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                  <h3 className="text-2xl font-bold text-white">Unisex</h3>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Features */}
+        <section className="bg-gray-50 py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+                Why Choose Our T-Shirts?
+              </h2>
+            </div>
+            <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-md bg-black text-white mx-auto">
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="mt-4 text-lg font-semibold text-gray-900">Premium Quality</h3>
+                <p className="mt-2 text-gray-600">Made from the finest organic cotton for lasting comfort</p>
+              </div>
+              <div className="text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-md bg-black text-white mx-auto">
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="mt-4 text-lg font-semibold text-gray-900">Fast Shipping</h3>
+                <p className="mt-2 text-gray-600">Free shipping on orders over $50</p>
+              </div>
+              <div className="text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-md bg-black text-white mx-auto">
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </div>
+                <h3 className="mt-4 text-lg font-semibold text-gray-900">Sustainable</h3>
+                <p className="mt-2 text-gray-600">Eco-friendly production with sustainable materials</p>
+              </div>
+              <div className="text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-md bg-black text-white mx-auto">
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="mt-4 text-lg font-semibold text-gray-900">Easy Returns</h3>
+                <p className="mt-2 text-gray-600">30-day hassle-free return policy</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="bg-black py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold tracking-tight text-white">
+                Ready to find your perfect t-shirt?
+              </h2>
+              <p className="mt-4 text-lg text-gray-300">
+                Join thousands of satisfied customers who love our quality and comfort.
+              </p>
+              <div className="mt-8">
+                <Link
+                  href="/products"
+                  className="rounded-md bg-white px-8 py-3 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100"
+                >
+                  Browse All Products
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
     </HydrateClient>
   );
 }

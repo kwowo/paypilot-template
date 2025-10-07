@@ -18,6 +18,14 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // 24 hours
   },
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        defaultValue: "USER",
+      },
+    },
+  },
 });
 
 export type Session = typeof auth.$Infer.Session;

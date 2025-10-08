@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { api } from "@/trpc/react";
 
-export default function ProductsPage() {
+// Component that uses useSearchParams - must be wrapped in Suspense
+function ProductsContent() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category");
   
@@ -23,15 +24,7 @@ export default function ProductsPage() {
   const products = productsData?.products ?? [];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">All T-Shirts</h1>
-        <p className="text-lg text-gray-600">
-          Browse our complete collection of premium t-shirts
-        </p>
-      </div>
-
+    <>
       {/* Filters */}
       <div className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Filter by Category</h3>
@@ -137,6 +130,53 @@ export default function ProductsPage() {
           ))}
         </div>
       )}
+    </>
+  );
+}
+
+// Fallback component for loading state
+function ProductsLoading() {
+  return (
+    <div className="space-y-8">
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <div className="h-6 bg-gray-200 rounded w-48 mb-4"></div>
+        <div className="flex flex-wrap gap-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-10 bg-gray-200 rounded w-24"></div>
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="bg-white rounded-lg shadow-sm animate-pulse">
+            <div className="aspect-square bg-gray-200 rounded-t-lg"></div>
+            <div className="p-4">
+              <div className="h-4 bg-gray-200 rounded mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-20"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">All T-Shirts</h1>
+        <p className="text-lg text-gray-600">
+          Browse our complete collection of premium t-shirts
+        </p>
+      </div>
+
+      {/* Wrap the component that uses useSearchParams in Suspense */}
+      <Suspense fallback={<ProductsLoading />}>
+        <ProductsContent />
+      </Suspense>
     </div>
   );
 }

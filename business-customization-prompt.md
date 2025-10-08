@@ -5,7 +5,45 @@ Transform business requirements into production-ready T3 stack applications usin
 
 ## 5-Phase Implementation Process
 
-### Phase 1: Discovery & Analysis (MANDATORY FIRST)
+### Phase 0: Framework Documentation Check (MANDATORY FIRST)
+
+**Next.js Version Compatibility Check:**
+Before any implementation, use Context7 MCP to fetch current Next.js documentation for breaking changes and best practices:
+
+```bash
+# Check package.json for Next.js version
+cat starter-template/package.json | grep "next"
+
+# If Next.js 15+, fetch documentation for:
+# - useSearchParams + Suspense boundaries
+# - Async request APIs (headers, cookies, params)
+# - Static vs dynamic rendering patterns
+# - Client/Server component patterns
+```
+
+**Framework-Specific Requirements:**
+```typescript
+// Next.js 15+ MANDATORY patterns:
+
+// ✅ Client components using useSearchParams MUST be wrapped in Suspense
+import { Suspense } from 'react';
+<Suspense fallback={<Loading />}>
+  <ComponentThatUsesSearchParams />
+</Suspense>
+
+// ✅ Server components with async params (Next.js 15+)
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params; // MUST await params
+}
+
+// ✅ Pages with database calls MUST use force-dynamic
+export const dynamic = 'force-dynamic';
+export default async function Page() {
+  await api.product.getAll.prefetch(); // Safe with force-dynamic
+}
+```
+
+### Phase 1: Discovery & Analysis (MANDATORY SECOND)
 
 **Codebase Discovery:**
 ```bash
@@ -581,6 +619,9 @@ updateQuantity.mutate();    // Handle promise properly
 ## Quality Gates (Must Pass)
 
 **Quality Gates (Must Pass):**
+- ✅ **Context7 Documentation Check:** Fetch and apply current Next.js best practices for version compatibility
+- ✅ **Suspense Boundaries:** All `useSearchParams()` usage wrapped in `<Suspense>` (Next.js 15+)
+- ✅ **Async Params:** Server components properly await `params` prop (Next.js 15+)
 - ✅ `pnpm build` passes (zero TypeScript/ESLint errors) **← PRODUCTION BUILD MUST PASS**
 - ✅ **Database-dependent pages use `force-dynamic`:** All pages with `await api.*` or `api.*.prefetch()` must export `const dynamic = 'force-dynamic'`
 - ✅ **Image placeholders only:** Use CSS div placeholders, no external images or local files
@@ -755,6 +796,9 @@ ls public/products/
 ## Final Checklist
 
 **Pre-Completion Review:**
+- [ ] **Framework Compatibility:** Context7 documentation consulted for current version best practices
+- [ ] **Suspense Boundaries:** All `useSearchParams()` components wrapped in `<Suspense>` (Next.js 15+)
+- [ ] **Async Params Handling:** Server components properly await `params` prop (Next.js 15+)
 - [ ] **Route Structure Complete:** No empty dynamic route folders (`find src/app -type d -name "\[*\]" -empty`)
 - [ ] **All page.tsx Files Present:** Every route folder contains `page.tsx`
 - [ ] **Database Pages Use force-dynamic:** All pages with `await api.*` or `api.*.prefetch()` export `const dynamic = 'force-dynamic'`

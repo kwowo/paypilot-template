@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { api, HydrateClient } from "@/trpc/server";
 
-// CRITICAL: Force dynamic rendering for pages with database queries
-export const dynamic = "force-dynamic";
+// Force dynamic rendering to avoid static generation issues with Next.js 15
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   // Prefetch featured products and categories

@@ -40,6 +40,8 @@ model User {
     accounts      Account[]
     sessions      Session[]
     posts         Post[]
+    cartItems     CartItem[]
+    orders        Order[]
 }
 
 model Session {
@@ -84,4 +86,135 @@ model Verification {
     updatedAt  DateTime @updatedAt
     
     @@unique([identifier, value])
+}
+
+// E-commerce Models for T-shirt Store
+model Category {
+    id        String    @id @default(cuid())
+    name      String    @unique
+    slug      String    @unique
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    
+    products  Product[]
+}
+
+model Product {
+    id          String      @id @default(cuid())
+    name        String
+    slug        String      @unique
+    description String?
+    price       Decimal     @db.Decimal(10, 2)
+    images      String[]
+    featured    Boolean     @default(false)
+    active      Boolean     @default(true)
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+    
+    categoryId  String
+    category    Category    @relation(fields: [categoryId], references: [id])
+    
+    variants    ProductVariant[]
+    cartItems   CartItem[]
+    orderItems  OrderItem[]
+    
+    @@index([slug])
+    @@index([categoryId])
+    @@index([featured])
+}
+
+model ProductVariant {
+    id        String    @id @default(cuid())
+    size      String    // XS, S, M, L, XL, XXL
+    color     String    // Black, White, Navy, Red, etc.
+    stock     Int       @default(0)
+    active    Boolean   @default(true)
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    
+    productId String
+    product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+    
+    cartItems CartItem[]
+    orderItems OrderItem[]
+    
+    @@unique([productId, size, color])
+    @@index([productId])
+}
+
+model CartItem {
+    id        String   @id @default(cuid())
+    quantity  Int      @default(1)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    
+    productId String
+    product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+    
+    variantId String
+    variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+    
+    @@unique([userId, productId, variantId])
+    @@index([userId])
+}
+
+model Order {
+    id           String      @id @default(cuid())
+    orderNumber  String      @unique
+    status       OrderStatus @default(PENDING)
+    total        Decimal     @db.Decimal(10, 2)
+    subtotal     Decimal     @db.Decimal(10, 2)
+    tax          Decimal     @db.Decimal(10, 2)
+    shipping     Decimal     @db.Decimal(10, 2)
+    
+    // Shipping Info
+    shippingName     String
+    shippingEmail    String
+    shippingAddress1 String
+    shippingAddress2 String?
+    shippingCity     String
+    shippingState    String
+    shippingZip      String
+    shippingCountry  String  @default("US")
+    
+    createdAt    DateTime    @default(now())
+    updatedAt    DateTime    @updatedAt
+    
+    userId       String
+    user         User        @relation(fields: [userId], references: [id])
+    
+    orderItems   OrderItem[]
+    
+    @@index([userId])
+    @@index([orderNumber])
+    @@index([status])
+}
+
+model OrderItem {
+    id        String   @id @default(cuid())
+    quantity  Int
+    price     Decimal  @db.Decimal(10, 2) // Price at time of purchase
+    createdAt DateTime @default(now())
+    
+    orderId   String
+    order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    
+    productId String
+    product   Product  @relation(fields: [productId], references: [id])
+    
+    variantId String
+    variant   ProductVariant @relation(fields: [variantId], references: [id])
+    
+    @@index([orderId])
+}
+
+enum OrderStatus {
+    PENDING
+    PROCESSING  
+    SHIPPED
+    DELIVERED
+    CANCELLED
 }

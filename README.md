@@ -1,17 +1,66 @@
-# Create T3 App
+# TeeStore - Premium T-Shirt E-commerce Platform
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app` and customized with Better Auth for authentication.
+A full-featured t-shirt e-commerce store built with the T3 stack (Next.js, TypeScript, tRPC, Prisma, PostgreSQL, and Better Auth).
 
-## Tech Stack
+## 🚀 Features
 
-This project uses the following technologies:
+### Core E-commerce Functionality
+- **Product Catalog**: Browse premium t-shirts with filtering by category
+- **Product Details**: Detailed product pages with size/color variant selection
+- **Shopping Cart**: Add items, update quantities, manage cart
+- **Checkout Process**: Complete order placement with shipping information
+- **Order Management**: View order history and detailed order tracking
+- **User Authentication**: Secure sign-up/sign-in with Better Auth
 
-- **[Next.js](https://nextjs.org)** - React framework with App Router
-- **[Better Auth](https://www.better-auth.com/)** - Modern authentication library
-- **[Prisma](https://prisma.io)** - Type-safe database ORM
-- **[tRPC](https://trpc.io)** - End-to-end typesafe APIs
-- **[Tailwind CSS](https://tailwindcss.com)** - Utility-first CSS framework
-- **[PostgreSQL](https://postgresql.org)** - Database via Docker
+### Product Features
+- **Multiple Variants**: Size (XS-XXL) and color options for each product
+- **Stock Management**: Real-time inventory tracking
+- **Categories**: Organized by Graphic Tees, Plain Tees, Vintage, Sports
+- **Featured Products**: Highlighted items on homepage
+- **Search & Filter**: Browse by category with dynamic filtering
+
+### Technical Features
+- **Type-Safe API**: End-to-end type safety with tRPC
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: Better Auth integration
+- **Responsive Design**: Mobile-friendly Tailwind CSS
+- **Server-Side Rendering**: Optimized performance with Next.js 15
+
+## 📦 Database Schema
+
+### Core Models
+- **User**: Customer accounts with Better Auth integration
+- **Product**: T-shirt products with descriptions and pricing
+- **ProductVariant**: Size/color combinations with stock tracking
+- **Category**: Product organization (Graphic Tees, Plain Tees, etc.)
+- **CartItem**: Shopping cart functionality
+- **Order & OrderItem**: Complete order management system
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript
+- **Database**: PostgreSQL with Docker
+- **ORM**: Prisma
+- **API**: tRPC for type-safe APIs
+- **Authentication**: Better Auth
+- **Styling**: Tailwind CSS
+- **State Management**: React Query (via tRPC)
+
+## 📱 Application Pages
+
+### Public Pages
+- **`/`** - Homepage with featured products and categories
+- **`/products`** - Product listing with category filtering
+- **`/products/[slug]`** - Individual product details with variant selection
+- **`/sign-in`** - User authentication
+- **`/sign-up`** - User registration
+
+### Protected Pages (Require Authentication)
+- **`/cart`** - Shopping cart management
+- **`/checkout`** - Order placement with shipping info
+- **`/orders`** - Order history listing
+- **`/orders/[id]`** - Detailed order tracking
 
 ## Getting Started
 
@@ -364,3 +413,51 @@ Follow deployment guides for:
 - [ ] Enable email verification if needed
 - [ ] Set up error monitoring
 - [ ] Configure analytics (optional)
+
+## 🛍️ User Workflows
+
+### Shopping Flow
+1. **Browse Products**: Homepage → Categories → Product Listing
+2. **Product Selection**: Product Detail → Size/Color Selection
+3. **Add to Cart**: Quantity Selection → Add to Cart
+4. **Checkout**: Cart Review → Shipping Info → Place Order
+5. **Order Tracking**: Order Confirmation → Order History
+
+### Sample Data Included
+- **4 Categories**: Graphic Tees, Plain Tees, Vintage, Sports
+- **8 Products**: Variety of t-shirt designs with realistic descriptions
+- **Product Variants**: Multiple size/color combinations for each product
+- **Stock Levels**: Randomized inventory for realistic testing
+
+## 🔧 Quick Start Commands
+
+```bash
+# Full setup (recommended)
+cd starter-template
+pnpm install
+pnpm db:setup     # Unix/Linux/MacOS
+# OR
+pnpm db:setup:win # Windows
+pnpm dev
+
+# Visit http://localhost:4000
+```
+
+## 🐛 Troubleshooting
+
+**Port Already in Use**:
+```bash
+PORT=3001 pnpm dev
+```
+
+**Database Issues**:
+```bash
+docker compose down
+docker compose up -d postgres
+```
+
+---
+
+**Happy Shopping! 👕🛒**
+
+For more information about the T3 stack, visit [create.t3.gg](https://create.t3.gg).

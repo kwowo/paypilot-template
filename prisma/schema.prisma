@@ -35,11 +35,26 @@ model User {
     image         String?
     createdAt     DateTime  @default(now())
     updatedAt     DateTime  @updatedAt
-    
+
+    // Shipping info for cart/order
+    shippingMethod      String   @default("standard")
+    shippingFirstName   String   @default("")
+    shippingLastName    String   @default("")
+    shippingEmail       String   @default("")
+    shippingPhone       String?  @default("")
+    shippingAddress     String   @default("")
+    shippingApartment   String?  @default("")
+    shippingCity        String   @default("")
+    shippingState       String   @default("")
+    shippingZipCode     String   @default("")
+    shippingCountry     String   @default("US")
+
     // Relations
     accounts      Account[]
     sessions      Session[]
     posts         Post[]
+    cartItems     CartItem[]
+    orders        Order[]
 }
 
 model Session {
@@ -82,6 +97,129 @@ model Verification {
     expiresAt  DateTime
     createdAt  DateTime @default(now())
     updatedAt  DateTime @updatedAt
-    
+
     @@unique([identifier, value])
+}
+
+// E-commerce Models
+model Product {
+    id              String   @id @default(cuid())
+    name            String
+    description     String?
+    price           Int      // Price in cents
+    originalPrice   Int?     // Original price in cents (if on sale)
+    imageUrl        String
+    category        String?
+    stock           Int      @default(0)
+    isActive        Boolean  @default(true)
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+
+    // Relations
+    variants        ProductVariant[]
+    cartItems       CartItem[]
+    orderItems      OrderItem[]
+
+    @@index([category])
+    @@index([isActive])
+}
+
+model ProductVariant {
+    id          String  @id @default(cuid())
+    productId   String
+    type        String  // 'color', 'size', etc.
+    value       String  // 'Red', 'Large', etc.
+    stock       Int     @default(0)
+
+    product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+    @@unique([productId, type, value])
+    @@index([productId])
+}
+
+model CartItem {
+    id          String   @id @default(cuid())
+    userId      String
+    productId   String
+    color       String
+    size        String
+    quantity    Int
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, productId, color, size])
+    @@index([userId])
+}
+
+model Order {
+    id                String      @id @default(cuid())
+    userId            String
+    orderNumber       String      @unique
+    idempotencyKey    String?     @unique
+
+    // Payment info
+    paypalOrderId     String?     @unique
+    paypalCaptureId   String?
+    paymentStatus     String      @default("pending") // pending, completed, failed, refunded
+
+    // Amounts (in cents)
+    subtotal          Int
+    shippingCost      Int
+    total             Int
+
+    // Shipping info
+    shippingMethod    String
+    shippingFirstName String
+    shippingLastName  String
+    shippingEmail     String
+    shippingPhone     String?
+    shippingAddress   String
+    shippingApartment String?
+    shippingCity      String
+    shippingState     String
+    shippingZipCode   String
+    shippingCountry   String
+
+    // Order status
+    status            String      @default("pending") // pending, processing, shipped, delivered, cancelled
+    
+    // Stock reservation expiry
+    reservationExpiresAt DateTime?
+
+    createdAt         DateTime    @default(now())
+    updatedAt         DateTime    @updatedAt
+
+    user              User        @relation(fields: [userId], references: [id])
+    items             OrderItem[]
+
+    @@index([userId])
+    @@index([paypalOrderId])
+    @@index([status])
+    @@index([createdAt])
+    @@index([reservationExpiresAt])
+    @@index([paymentStatus, reservationExpiresAt])
+    @@index([idempotencyKey])
+}
+
+model OrderItem {
+    id              String   @id @default(cuid())
+    orderId         String
+    productId       String
+
+    // Snapshot of product at time of order
+    productName     String
+    color           String
+    size            String
+    price           Int      // Price per unit in cents at time of order
+    quantity        Int
+
+    createdAt       DateTime @default(now())
+
+    order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    product         Product  @relation(fields: [productId], references: [id])
+
+    @@index([orderId])
 }

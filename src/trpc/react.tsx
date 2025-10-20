@@ -4,7 +4,7 @@ import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 import { httpBatchStreamLink, loggerLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SuperJSON from "superjson";
 
 import { type AppRouter } from "@/server/api/root";
@@ -13,14 +13,22 @@ import { createQueryClient } from "./query-client";
 let clientQueryClientSingleton: QueryClient | undefined = undefined;
 const getQueryClient = () => {
   if (typeof window === "undefined") {
-    // Server: always make a new query client
     return createQueryClient();
   }
-  // Browser: use singleton pattern to keep the same query client
   clientQueryClientSingleton ??= createQueryClient();
 
   return clientQueryClientSingleton;
 };
+
+function getCsrfToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return sessionStorage.getItem("csrf-token");
+}
+
+function setCsrfToken(token: string): void {
+  if (typeof window === "undefined") return;
+  sessionStorage.setItem("csrf-token", token);
+}
 
 export const api = createTRPCReact<AppRouter>();
 
@@ -41,6 +49,38 @@ export type RouterOutputs = inferRouterOutputs<AppRouter>;
 export function TRPCReactProvider(props: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
 
+  useEffect(() => {
+    const fetchCsrfToken = async () => {
+      try {
+        const response = await fetch("/api/trpc/csrf.get");
+        const headerToken = response.headers.get("x-csrf-token");
+        if (headerToken) {
+          setCsrfToken(headerToken);
+        } else {
+          console.error("No x-csrf-token header in response");
+        }
+      } catch (error) {
+        console.error("Failed to fetch CSRF token:", error);
+      }
+    };
+
+    void fetchCsrfToken();
+
+    // Listen for session changes to refetch CSRF token
+    const handleSessionChange = () => {
+      // Clear old token and fetch new one
+      sessionStorage.removeItem("csrf-token");
+      void fetchCsrfToken();
+    };
+
+    // Custom event for when user logs in/out
+    window.addEventListener("auth-session-change", handleSessionChange);
+
+    return () => {
+      window.removeEventListener("auth-session-change", handleSessionChange);
+    };
+  }, []);
+
   const [trpcClient] = useState(() =>
     api.createClient({
       links: [
@@ -55,6 +95,15 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
           headers: () => {
             const headers = new Headers();
             headers.set("x-trpc-source", "nextjs-react");
+            
+            const token = getCsrfToken();
+            if (token) {
+              headers.set("x-csrf-token", token);
+              // console.log("Adding CSRF token to request:", token.substring(0, 10) + "...");
+            } else {
+              console.warn("No CSRF token available for request");
+            }
+            
             return headers;
           },
         }),

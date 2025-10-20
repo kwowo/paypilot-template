@@ -112,6 +112,21 @@ This project uses the following technologies:
 
    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Security
+
+This application implements comprehensive security measures with an **A- security grade**:
+
+- **CSRF Protection** - Session-bound tokens with HMAC-SHA256 signing and double-submit cookie pattern
+- **Rate Limiting** - PostgreSQL-backed distributed rate limiting on auth, orders, and cart operations
+- **Security Headers** - Complete header configuration (CSP, HSTS, X-Frame-Options, etc.)
+- **Input Validation** - Zod schema validation with regex patterns for all user inputs
+- **Security Logging** - Structured JSON logging for all critical operations and security events
+- **Session Management** - Optimized 2-day sessions with secure, httpOnly cookies
+- **Idempotency** - Protection against duplicate orders from network issues
+- **Secure Secrets** - Environment validation with no hardcoded fallbacks
+
+See [SECURITY_AUDIT_UPDATE.md](SECURITY_AUDIT_UPDATE.md) for detailed security documentation.
+
 ## Authentication
 
 This project uses [Better Auth](https://www.better-auth.com/) for authentication with the following features:

@@ -13,6 +13,8 @@ import { ZodError } from "zod";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/server/db";
+import { checkOrderRateLimit, checkCartRateLimit } from "@/lib/pg-rate-limiter";
+import { logger } from "@/lib/logger";
 
 /**
  * 1. CONTEXT
@@ -133,3 +135,45 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+const orderRateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
+  const success = await checkOrderRateLimit(ctx.headers);
+
+  if (!success) {
+    logger.warn({
+      event: "rate_limit_exceeded",
+      endpoint: "order_creation",
+      userId: ctx.session?.user?.id,
+    }, "Order creation rate limit exceeded");
+
+    throw new TRPCError({
+      code: "TOO_MANY_REQUESTS",
+      message: "Too many order creation attempts, please try again later"
+    });
+  }
+
+  return next();
+});
+
+const cartRateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
+  const success = await checkCartRateLimit(ctx.headers);
+
+  if (!success) {
+    logger.warn({
+      event: "rate_limit_exceeded",
+      endpoint: "cart_operations",
+      userId: ctx.session?.user?.id,
+    }, "Cart operations rate limit exceeded");
+
+    throw new TRPCError({
+      code: "TOO_MANY_REQUESTS",
+      message: "Too many cart operations, please slow down"
+    });
+  }
+
+  return next();
+});
+
+export const rateLimitedOrderProcedure = protectedProcedure.use(orderRateLimitMiddleware);
+
+export const rateLimitedCartProcedure = protectedProcedure.use(cartRateLimitMiddleware);

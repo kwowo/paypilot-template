@@ -11,6 +11,10 @@ export function SignOutButton() {
       const result = await signOut({
         fetchOptions: {
           onSuccess: () => {
+            // Trigger CSRF token refresh on sign out
+            if (typeof window !== "undefined") {
+              window.dispatchEvent(new Event("auth-session-change"));
+            }
             router.push("/");
             router.refresh();
           },
@@ -19,6 +23,10 @@ export function SignOutButton() {
       console.log("Sign out result:", result);
     } catch (error) {
       console.error("Sign out error:", error);
+      // Trigger CSRF token refresh even on error
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("auth-session-change"));
+      }
       // Fallback: Force redirect even if signOut fails
       router.push("/");
       router.refresh();

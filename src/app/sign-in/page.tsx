@@ -26,10 +26,19 @@ export default function SignInPage() {
       if (result.error) {
         setError(result.error.message ?? "Sign in failed");
       } else {
+        // Trigger CSRF token refresh on successful login
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("auth-session-change"));
+        }
         router.push("/");
       }
-    } catch (_err) {
-      setError("An unexpected error occurred");
+    } catch (err) {
+      // Handle network errors, timeouts, and rate limiting
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }

@@ -15,14 +15,17 @@ const config = {
     } : false,
   },
   async headers() {
+    // Allow iframe embedding in development mode for preview purposes
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    
     return [
       {
         source: '/:path*',
         headers: [
-          {
+          ...(isDevelopment ? [] : [{
             key: 'X-Frame-Options',
             value: 'DENY',
-          },
+          }]),
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',

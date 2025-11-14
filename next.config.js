@@ -15,14 +15,24 @@ const config = {
     } : false,
   },
   async headers() {
+    // Allow iframe embedding in development mode or when ALLOW_IFRAME is set for preview purposes
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const allowIframe = 'true';
+    
+    console.log('Next.js headers config:', {
+      NODE_ENV: process.env.NODE_ENV,
+      ALLOW_IFRAME: allowIframe,          
+      isDevelopment,
+    });
+    
     return [
       {
         source: '/:path*',
         headers: [
-          {
+          ...(allowIframe ? [] : [{
             key: 'X-Frame-Options',
             value: 'DENY',
-          },
+          }]),
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
@@ -37,7 +47,9 @@ const config = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://*.paypal.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://api.paypal.com https://*.paypal.com; frame-src https://www.paypal.com https://*.paypal.com; object-src 'none'; base-uri 'self'; form-action 'self';",
+            value: allowIframe 
+              ? "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://*.paypal.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://api.paypal.com https://*.paypal.com; frame-src https://www.paypal.com https://*.paypal.com; frame-ancestors 'self' http://localhost:* http://127.0.0.1:*; object-src 'none'; base-uri 'self'; form-action 'self';"
+              : "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://*.paypal.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://api.paypal.com https://*.paypal.com; frame-src https://www.paypal.com https://*.paypal.com; object-src 'none'; base-uri 'self'; form-action 'self';",
           },
           {
             key: 'Referrer-Policy',

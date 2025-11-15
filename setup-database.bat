@@ -1,21 +1,12 @@
 @echo off
-rem Run migrations and seed
+rem Reset database and sync schema
 
-echo Running Prisma migrations...
-pnpm prisma migrate dev --name init && pnpm prisma db seed
+echo Syncing database schema...
+pnpm prisma db push --force-reset && pnpm prisma db seed
 
 if %errorlevel% neq 0 (
-    echo Failed to run Prisma migrations
+    echo Database setup failed!
     exit /b 1
-)
-
-echo Running database seed (if available)...
-if exist "prisma\seed.ts" (
-    pnpm prisma db seed
-) else if exist "prisma\seed.js" (
-    pnpm prisma db seed
-) else (
-    echo No seed file found, skipping seeding
 )
 
 echo Database setup complete!

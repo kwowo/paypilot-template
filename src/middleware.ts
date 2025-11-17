@@ -7,7 +7,8 @@ import {
   shouldCheckCsrf,
 } from "@/lib/csrf";
 
-const ENFORCE_CSRF_TOKENS = process.env.ENFORCE_CSRF_TOKENS !== "false";
+// const ENFORCE_CSRF_TOKENS = process.env.ENFORCE_CSRF_TOKENS !== "false";
+const ENFORCE_CSRF_TOKENS = false;
 
 // Helper to extract session ID from Better Auth session cookie
 function getSessionIdFromRequest(request: NextRequest): string | undefined {

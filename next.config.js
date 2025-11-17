@@ -6,6 +6,18 @@ import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
 const config = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**', // Allow all HTTPS domains
+      },
+      {
+        protocol: 'http',
+        hostname: '**', // Allow all HTTP domains
+      },
+    ],
+  },
   output: "standalone",
   productionBrowserSourceMaps: false,
   serverExternalPackages: ['pg', 'postgres-migrations', '@acpr/rate-limit-postgresql'],

@@ -45,7 +45,7 @@ const config = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://*.paypal.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://api.paypal.com https://api.paypilot.com https://*.paypal.com; frame-src https://www.paypal.com https://*.paypal.com; frame-ancestors *; object-src 'none'; base-uri 'self'; form-action 'self';",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://*.paypal.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://api.paypal.com https://api.paypilotgo.com https://*.paypal.com; frame-src https://www.paypal.com https://*.paypal.com; frame-ancestors *; object-src 'none'; base-uri 'self'; form-action 'self';",
           },
           {
             key: 'Referrer-Policy',

@@ -103,24 +103,31 @@ export default function PaymentPage() {
               
               {/* Order Items */}
               <div className="mb-4 space-y-3">
-                {checkoutData.cartItems.map((item) => (
-                  <div key={item.id} className="flex items-center space-x-3">
-                    <Image 
-                      src={item.imageUrl} 
-                      alt={item.name}
-                      width={48}
-                      height={48}
-                      className="h-12 w-12 rounded-md object-cover"
-                    />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">{item.name}</p>
-                      <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                {checkoutData.cartItems.map((item) => {
+                  // Ensure imageUrl is valid for next/image
+                  const imageUrl = item.imageUrl?.startsWith('/') || item.imageUrl?.startsWith('http')
+                    ? item.imageUrl
+                    : '/placeholder-product.jpg';
+
+                  return (
+                    <div key={item.id} className="flex items-center space-x-3">
+                      <Image
+                        src={imageUrl}
+                        alt={item.name}
+                        width={48}
+                        height={48}
+                        className="h-12 w-12 rounded-md object-cover"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">{item.name}</p>
+                        <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                      </div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {formatPrice(item.price * item.quantity)}
+                      </p>
                     </div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {formatPrice(item.price * item.quantity)}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Shipping Information */}

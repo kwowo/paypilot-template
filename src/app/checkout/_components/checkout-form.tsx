@@ -161,8 +161,9 @@ export function CheckoutForm() {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return !emailRegex.test(value) ? "Please enter a valid email address" : "";
       case "phone":
+        if (!value.trim()) return "Phone number is required";
         const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-        return value && !phoneRegex.test(value.replace(/[\s\-\(\)]/g, "")) ? "Please enter a valid phone number" : "";
+        return !phoneRegex.test(value.replace(/[\s\-\(\)]/g, "")) ? "Please enter a valid phone number" : "";
       case "address":
         return value.trim().length < 5 ? "Please enter a complete address" : "";
       case "city":
@@ -182,7 +183,7 @@ export function CheckoutForm() {
   const validateAllFields = (): boolean => {
     const errors: ValidationErrors = {};
     const requiredFields: (keyof ShippingInfo)[] = [
-      "firstName", "lastName", "email", "address", "city", "state", "zipCode", "country"
+      "firstName", "lastName", "email", "phone", "address", "city", "state", "zipCode", "country"
     ];
 
     requiredFields.forEach(field => {
@@ -191,14 +192,6 @@ export function CheckoutForm() {
         errors[field] = error;
       }
     });
-
-    // Validate phone if provided
-    if (shippingInfo.phone) {
-      const phoneError = validateField("phone", shippingInfo.phone);
-      if (phoneError) {
-        errors.phone = phoneError;
-      }
-    }
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
@@ -370,7 +363,7 @@ export function CheckoutForm() {
 
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number
+                Phone Number *
               </label>
               <input
                 type="tel"
